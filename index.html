@@ -1,0 +1,306 @@
+s<!doctype html>
+<html lang="en">
+
+    <head>
+	<meta charset="utf-8">
+
+	<title>Extend Your ArcGIS Map Services with Mapbox Tools</title>
+
+	<meta name="description" content="Perhaps you have heard of the neat capabilities of Mapbox Studio, but your map services are all using ArcGIS Server. Or maybe you want to leverage your local government's map services for a mobile or web mapping application. This talk will demonstrate new ways to display ArcGIS Server tiled map services using open source Mapbox tools and libraries.">
+	<meta name="author" content="Nick Peihl">
+
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/league.css" id="theme">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <style> .reveal i.fa { font-family:FontAwesome; font-style: normal; } </style>
+
+	<!-- Code syntax highlighting -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+	 var link = document.createElement( 'link' );
+	 link.rel = 'stylesheet';
+	 link.type = 'text/css';
+	 link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+	 document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+
+	<!--[if lt IE 9]>
+	<script src="lib/js/html5shiv.js"></script>
+	<![endif]-->
+    </head>
+
+    <body>
+
+	<div class="reveal">
+
+	    <!-- Any section element inside of this container is displayed as a slide -->
+	    <div class="slides">
+		<section>
+		    <h1>Extend Your ArcGIS Map Services With Mapbox Tools</h1>
+		    <h3>Nick Peihl, San Juan County, WA</h3>
+		    <p>
+			<small><a href="http://npeihl.com">npeihl.com</a> / <a href="http://twitter.com/npeihl">@npeihl</a></small>
+		    </p>
+                    <aside class="notes">
+                        Note, I don't work for Mapbox. I work for a small county off the western coast of Washington.
+                    </aside>
+		</section>
+
+                <section>
+		    <h2>About Me</h2>
+                    <p>By name: County GIS Coordinator</p>
+                    <p>But really: Developer, hacker, seeker</p>
+                    <p>Member of Cascadia Users of Geospatial Open Source (<a href="http://cugos.org">CUGOS.org</a>)</p>
+                    <aside class="notes">
+
+                    </aside>
+                </section>
+
+
+                <section>
+                    <h2>Build Apps with Mapbox</h2>
+                </section>
+
+                <section>
+                    <h2>TileJSON</h2>
+                    <blockquote cite="https://github.com/mapbox/tilejson-spec">
+                        TileJSON is an open standard for representing map metadata.
+                    </blockquote>
+                    <a href="https://github.com/mapbox/tilejson-spec">Details</a>
+                    <aside class="notes">
+                        First, let's step aside and talk about the TileJSON-Spec. TileJSON was created by Mapbox as a method to represent map metadata.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>TileJSON Example</h2>
+                    <pre class="stretch" ><code class="JavaScript"  data-trim>
+{
+    "tilejson": "1.0.0",
+    "name": "OpenStreetMap",
+    "description": "A free editable map of the whole world.",
+    "version": "1.0.0",
+    "attribution": "(c) OpenStreetMap contributors, CC-BY-SA",
+    "scheme": "xyz",
+    "tiles": [
+        "http://a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+        "http://b.tile.openstreetmap.org/${z}/${x}/${y}.png",
+        "http://c.tile.openstreetmap.org/${z}/${x}/${y}.png"
+    ],
+    "minzoom": 0,
+    "maxzoom": 18,
+    "bounds": [ -180, -85, 180, 85 ]
+}
+                    </code></pre>
+                </section>
+
+                <section>
+                    <h2>ArcGIS Tiled Map Service as TileJSON</h2>
+                    <pre class="stretch" ><code class="JavaScript" data-trim>
+{
+    "tilejson": "2.1.0",
+    "name": "imagery2013",
+    "description": "Aerial imagery of San Juan County WA taken in 2013",
+    "version": "1.0.0",
+    "tiles": [
+        "http://sjcgis.org/arcgis/rest/services/Basemaps/Aerials_2013_WM/MapServer/tile/{z}/{y}/{x}"
+    ],
+    "minzoom": 8,
+    "maxzoom": 19,
+    "bounds": [-123.256989,48.380882,-122.737885,48.827661],
+    "center": [-122.997437,48.604766]
+}
+                    </code></pre>
+                    <aside class="notes">
+                        Note how we add /tile/ and the z y and x placeholders to the Map Service URL. Also note the reverse placement of the {y} and {x} parameters for ArcGIS Server services.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Mapbox-GL-js Demo</h2>
+                    <a href="http://bl.ocks.org/npeihl/a6e2bbbcef78cbfe3cde">Link</a>
+                    <aside class="notes">
+                        Loads as your typical orthogonal web map. But we can use Shift and Arrows to set pitch and bearing. Or we can generate random locations to fly to using the button, Island Hopping! The map style defines the layers to use. Each "source" is a snippet of TileJSON.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Mapbox-GL-Native Demo</h2>
+                    <a href="http://github.com/npeihl/sjcMap-android">Source code</a>
+                    <aside class="notes" >
+                        The Mapbox GL Native SDK works with several operating systems including Android and iOS. Here's an example Android application using the TileJSON file we defined previously. I used Mapbox's First Steps to create this very basic app. You can use two finger touch gestures to zoom in and out, rotate the map or even "shove" the map to set the pitch.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Go Offline with MBTiles</h2>
+                    <aside class="notes">
+                        At the County we're experimenting with solutions to get around this dis-connectivity issue.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>MBTiles</h2>
+                    <blockquote cite="https://github.com/mapbox/mbtiles-spec">
+                        MBTiles is a specification for storing tiled map data in SQLite databases for immediate usage and for transfer.
+                    </blockquote>
+                    <a href="https://github.com/mapbox/mbtiles-spec">Details</a>
+                    <aside class="notes">
+                        MBTiles was created by Mapbox for storing tiled maps.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Tilelive</h2>
+                    <blockquote>
+                        Tilelive is a module to help interactions between tilelive source modules.
+                    </blockquote>
+                    <a href="https://github.com/mapbox/tilelive">Details</a>
+                    <aside class="notes">
+                        TileJSON is one of many tilelive sources. MBTiles is another source.
+                    </aside>
+                </section>
+
+                <section>
+                    <h3>TileJSON ---> MBTiles</h3>
+                    <aside class="notes">
+                        We're going to use Tilelive to copy the raster tiles from the TileJSON file to a portable MBTiles database.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Download Demo</h2>
+                    <a href="http://github.com/npeihl/tilelive-download-example">Source code</a>
+                    <aside class="notes">
+                        I've written a script to download all the raster tiles using Node.js libraries. This script already has our TileJSON file. The TileJSON and MBTiles protocols are registered with Tilelive. Notice how only the tiles referenced within the bounds and min/max zooms specified in the TileJSON file are downloaded. I could set the maxzoom to 19 to get all levels but that would take hours to download.
+                    </aside>
+                </section>
+
+                <section>
+                    <h1><em>DON'T</em></h1>
+                    <h1><em>BE</em></h1>
+                    <h1><em>EVIL</em></h1>
+                </section>
+
+                <section>
+                    <h3>Adhere to usage restrictions and licenses</h3>
+                    <aside class="notes">
+                        Some aerial imagery or basemaps are protected by copyright or other restrictions. Do your homework and make sure you aren't violating those.
+                    </aside>
+                </section>
+
+                <section>
+                    <h3>Limit your bounds and maxzoom</h3>
+                    <aside class="notes">
+                        Don't get greedy. Limit the bounds and max zoom only to what you need. Otherwise you're hammering servers and will quickly run into usage limits or IP bans.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Ways to Use MBTiles</h2>
+                    <ul>
+                        <li>Upload to Mapbox Studio</li>
+                        <li>Mobile Apps for Field Work</li>
+                    </ul>
+                    <aside class="notes" >You can use your new MBTiles basemap directly in Mapbox Studio. You can also load it in mobile apps that support MBTiles.</aside>
+                </section>
+
+                <section>
+                    <h2>Mapbox Studio Demo</h2>
+                    <a href="https://www.mapbox.com/studio/">Mapbox Studio</a>
+                    <aside class="notes">
+                        Open Mapbox Studio and click the Data tab. Select New dataset then upload the MBTiles database created from the earlier download. Once it finishes uploading you can use it in a style that can be referenced from other apps.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Mobile App Demos</h2>
+                    <figure>
+                        <img src="img/geopaparazzi.jpg"/>
+                        <figcaption>
+                            <a href="http://geopaparazzi.github.io/geopaparazzi/">Geopaparazzi</a>
+                        </figcaption>
+                    </figure>
+
+                    <aside class="notes">
+                        There are many free and paid apps for both Android and iOS that support viewing raster MBTiles. Geopaparazzi and MBTiles GPS are two examples. Geopaparazzi is an open source app for Android that allows you to show one MBTiles layer at a time.
+                    </aside>
+                </section>
+
+                <section>
+                    <figure>
+                        <img src="img/mbtiles-gps.png"/>
+                        <figcaption>
+                            <a href="https://itunes.apple.com/us/app/mbtiles-gps/id592703465?mt=8">MBTiles GPS</a>
+                        </figcaption>
+                    </figure>
+                    <aside class="notes">
+                        MBTiles GPS is no cost, but proprietary. It can show layers from multiple MBTiles databases at the same time. So you could add a reference overlay over top the aerial imagery as seen on our app here.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Map Service Requirements</h2>
+                    <ul>
+                        <li>Cached</li>
+                        <li>Web Mercator (EPSG:3857)</li>
+                        <li>Default Tile Scheme</li>
+                    </ul>
+                    <aside class="notes">
+                        To use these workflows the map service must be cached using the Web Mercator coordinate system and the default tiling scheme in ArcGIS Server.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Questions?</h2>
+                    <ul>
+                        <li><a href="http://npeihl.com/ags-mapbox-presentation">npeihl.com/ags-mapbox-presentation</a></li>
+                        <li>Website: <a href="http://www.npeihl.com/">npeihl.com</a></li>
+                        <li>Twitter: <a href="http://twitter.com/npeihl">@npeihl</a></li>
+                        <li>GitHub: <a href="http://github.com/npeihl">@npeihl</li>
+                        <li>Email: <a href="mailto:nick.peihl@gmail.com">nick.peihl@gmail.com</a></li>
+                    </ul>
+
+                </section>
+
+	    </div>
+
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+
+	 // Full list of configuration options available at:
+	 // https://github.com/hakimel/reveal.js#configuration
+	 Reveal.initialize({
+	     controls: true,
+	     progress: true,
+	     history: false,
+	     center: true,
+
+	     transition: 'none', // none/fade/slide/convex/concave/zoom
+
+	     // Optional reveal.js plugins
+	     dependencies: [
+		 { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+		 { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+		 { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+		 { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+		 { src: 'plugin/zoom-js/zoom.js', async: true },
+		 { src: 'plugin/notes/notes.js', async: true }
+	     ]
+	 });
+
+	</script>
+
+    </body>
+</html>
